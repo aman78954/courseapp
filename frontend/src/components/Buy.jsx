@@ -22,7 +22,7 @@ function Buy() {
 
   
   useEffect(() => {
-    console.log(token)
+    
     if (!token) {
       navigate("/login");
     }
