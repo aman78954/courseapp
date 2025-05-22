@@ -90,3 +90,4 @@ export const logout = (req, res) => {
     console.log("Error in logout", error);
   }
 };
+

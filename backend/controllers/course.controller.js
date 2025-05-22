@@ -110,7 +110,7 @@ export const deleteCourse = async (req, res) => {
 
 export const getCourses = async (req, res) => {
   try {
-    const courses = await Course.find({});
+    const courses = await Course.find();
     res.status(201).json({ courses });
   } catch (error) {
     res.status(500).json({ errors: "Error in getting courses" });
