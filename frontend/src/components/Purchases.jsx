@@ -1,4 +1,3 @@
-
 import axios from "axios";
 import React, { useEffect, useState } from "react";
 import toast from "react-hot-toast";
@@ -7,35 +6,28 @@ import { FaDiscourse, FaDownload } from "react-icons/fa";
 import { IoMdSettings } from "react-icons/io";
 import { IoLogIn, IoLogOut } from "react-icons/io5";
 import { RiHome2Fill } from "react-icons/ri";
-import { HiMenu, HiX } from "react-icons/hi"; // Icons for sidebar toggle
+import { HiMenu, HiX } from "react-icons/hi";
 import { Link, useNavigate } from "react-router-dom";
 import { BACKEND_URL } from "../utils/utils";
 
 function Purchases() {
   const [purchases, setPurchase] = useState([]);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
-  const [errorMessage, setErrorMessage] = useState(true);
-  const [isSidebarOpen, setIsSidebarOpen] = useState(false); // Sidebar open state
+  const [errorMessage, setErrorMessage] = useState("");
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
   const navigate = useNavigate();
-    const user = JSON.parse(localStorage.getItem("user"));
-  const token = user?.token; // using optional chaining to avoid app crashing
+  const user = JSON.parse(localStorage.getItem("user"));
+  const token = user?.token;
 
-  console.log("purchases: ", purchases);
-
-  // Token handling
+  // Token handling and redirect if not logged in
   useEffect(() => {
- 
-    if (token) {
-      setIsLoggedIn(true);
+    if (!token) {
+      navigate("/login");
     } else {
-      setIsLoggedIn(false);
+      setIsLoggedIn(true);
     }
-  }, []);
-
-  if (!token) {
-    navigate("/login");
-  }
+  }, [token, navigate]);
 
   // Fetch purchases
   useEffect(() => {
@@ -52,8 +44,11 @@ function Purchases() {
         setErrorMessage("Failed to fetch purchase data");
       }
     };
-    fetchPurchases();
-  }, []);
+
+    if (token) {
+      fetchPurchases();
+    }
+  }, [token]);
 
   // Logout
   const handleLogout = async () => {
@@ -63,16 +58,15 @@ function Purchases() {
       });
       toast.success(response.data.message);
       localStorage.removeItem("user");
-
       setIsLoggedIn(false);
-            navigate("/");
+      navigate("/");
     } catch (error) {
       console.log("Error in logging out ", error);
-      toast.error(error.response.data.errors || "Error in logging out");
+      toast.error(error.response?.data?.errors || "Error in logging out");
     }
   };
 
-  // Toggle sidebar visibility
+  // Sidebar toggle
   const toggleSidebar = () => {
     setIsSidebarOpen(!isSidebarOpen);
   };
@@ -86,12 +80,21 @@ function Purchases() {
         } md:translate-x-0 transition-transform duration-300 ease-in-out w-64 z-50`}
       >
         <nav>
-          
           <ul className="mt-16 md:mt-0">
             <li className="p-6 flex items-center gap-4 border-b">
-                      <img onClick={()=>navigate("/")} src={logo1} alt="Logo" className="h-12 w-12 rounded-full" />
-                      <h2 onClick={()=>navigate("/")} className="text-lg font-semibold text-gray-800 cursor-pointer">CourseOcean</h2>
-                    </li>
+              <img
+                onClick={() => navigate("/")}
+                src={logo1}
+                alt="Logo"
+                className="h-12 w-12 rounded-full"
+              />
+              <h2
+                onClick={() => navigate("/")}
+                className="text-lg font-semibold text-gray-800 cursor-pointer"
+              >
+                CourseOcean
+              </h2>
+            </li>
             <li className="mb-4">
               <Link to="/" className="flex items-center">
                 <RiHome2Fill className="mr-2" /> Home
@@ -107,7 +110,6 @@ function Purchases() {
                 <FaDownload className="mr-2" /> Purchases
               </a>
             </li>
-           
             <li>
               {isLoggedIn ? (
                 <button onClick={handleLogout} className="flex items-center">
@@ -159,11 +161,11 @@ function Purchases() {
                 className="bg-white rounded-lg shadow-md p-6 mb-6"
               >
                 <div className="flex flex-col items-center space-y-4">
-                  {/* Course Image */}
                   <img
                     className="rounded-lg w-full h-48 object-cover"
                     src={
-                      purchase.image?.url || "https://via.placeholder.com/200"
+                      purchase.image?.url ||
+                      "https://via.placeholder.com/200"
                     }
                     alt={purchase.title}
                   />
