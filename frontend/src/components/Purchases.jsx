@@ -2,6 +2,7 @@
 import axios from "axios";
 import React, { useEffect, useState } from "react";
 import toast from "react-hot-toast";
+import logo1 from "../../public/logo1.jpg";
 import { FaDiscourse, FaDownload } from "react-icons/fa";
 import { IoMdSettings } from "react-icons/io";
 import { IoLogIn, IoLogOut } from "react-icons/io5";
@@ -62,8 +63,9 @@ function Purchases() {
       });
       toast.success(response.data.message);
       localStorage.removeItem("user");
-      navigate("/login");
+
       setIsLoggedIn(false);
+            navigate("/");
     } catch (error) {
       console.log("Error in logging out ", error);
       toast.error(error.response.data.errors || "Error in logging out");
@@ -84,7 +86,12 @@ function Purchases() {
         } md:translate-x-0 transition-transform duration-300 ease-in-out w-64 z-50`}
       >
         <nav>
+          
           <ul className="mt-16 md:mt-0">
+            <li className="p-6 flex items-center gap-4 border-b">
+                      <img onClick={()=>navigate("/")} src={logo1} alt="Logo" className="h-12 w-12 rounded-full" />
+                      <h2 onClick={()=>navigate("/")} className="text-lg font-semibold text-gray-800 cursor-pointer">CourseOcean</h2>
+                    </li>
             <li className="mb-4">
               <Link to="/" className="flex items-center">
                 <RiHome2Fill className="mr-2" /> Home
@@ -100,11 +107,7 @@ function Purchases() {
                 <FaDownload className="mr-2" /> Purchases
               </a>
             </li>
-            <li className="mb-4">
-              <Link to="/settings" className="flex items-center">
-                <IoMdSettings className="mr-2" /> Settings
-              </Link>
-            </li>
+           
             <li>
               {isLoggedIn ? (
                 <button onClick={handleLogout} className="flex items-center">

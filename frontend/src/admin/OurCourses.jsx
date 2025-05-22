@@ -19,20 +19,26 @@ function OurCourses() {
 
   // fetch courses
   useEffect(() => {
-    const fetchCourses = async () => {
-      try {
-        const response = await axios.get(`${BACKEND_URL}/course/courses`, {
-          withCredentials: true,
-        });
-        console.log(response.data.courses);
-        setCourses(response.data.courses);
-        setLoading(false);
-      } catch (error) {
-        console.log("error in fetchCourses ", error);
-      }
-    };
-    fetchCourses();
-  }, []);
+  const fetchCourses = async () => {
+    try {
+      const response = await axios.get(`${BACKEND_URL}/course/courses`, {
+        withCredentials: true,
+      });
+
+      const allCourses = response.data.courses;
+      const myCourses = allCourses.filter(
+        (course) => course.creatorId === admin._id // match by id
+      );
+
+      setCourses(myCourses);
+      setLoading(false);
+    } catch (error) {
+      console.log("error in fetchCourses ", error);
+    }
+  };
+  fetchCourses();
+}, []);
+
 
   // delete courses code
   const handleDelete = async (id) => {
@@ -61,7 +67,7 @@ function OurCourses() {
 
   return (
     <div className="bg-gray-100 p-8 space-y-4">
-      <h1 className="text-3xl font-bold text-center mb-8">Our Courses</h1>
+      <h1 className="text-3xl font-bold text-center mb-8">My Courses</h1>
       <Link
         className="bg-orange-400 py-2 px-4 rounded-lg text-white hover:bg-orange-950 duration-300"
         to={"/admin/dashboard"}

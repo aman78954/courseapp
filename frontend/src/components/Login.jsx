@@ -4,11 +4,12 @@ import { Link, useNavigate } from "react-router-dom";
 import axios from "axios";
 import toast from "react-hot-toast";
 import { BACKEND_URL } from "../utils/utils";
-function Login() {
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
 
-  const [errorMessage, setErrorMessage] = useState("");
+function Login() {
+  const [email, setEmail] = useState(""); // Email state
+  const [password, setPassword] = useState(""); // Password state
+  const [showPassword, setShowPassword] = useState(false); // Toggle visibility
+  const [errorMessage, setErrorMessage] = useState(""); // Error message
 
   const navigate = useNavigate();
 
@@ -18,21 +19,16 @@ function Login() {
     try {
       const response = await axios.post(
         `${BACKEND_URL}/user/login`,
-        {
-          email,
-          password,
-        },
+        { email, password },
         {
           withCredentials: true,
-          headers: {
-            "Content-Type": "application/json",
-          },
+          headers: { "Content-Type": "application/json" },
         }
       );
-      console.log("Login successful: ", response.data);
+
       toast.success(response.data.message);
       localStorage.setItem("user", JSON.stringify(response.data));
-      navigate("/");
+      navigate("/courses");
     } catch (error) {
       if (error.response) {
         setErrorMessage(error.response.data.errors || "Login failed!!!");
@@ -41,10 +37,10 @@ function Login() {
   };
 
   return (
-    <div className="bg-gradient-to-r from-black to-blue-950 ">
-      <div className="h-screen container mx-auto flex  items-center justify-center text-white">
+    <div className="bg-gradient-to-r from-black to-blue-950">
+      <div className="h-screen container mx-auto flex items-center justify-center text-white">
         {/* Header */}
-        <header className="absolute top-0 left-0 w-full flex justify-between items-center p-5  ">
+        <header className="absolute top-0 left-0 w-full flex justify-between items-center p-5">
           <div className="flex items-center space-x-2">
             <img src={logo1} alt="Logo" className="w-10 h-10 rounded-full" />
             <Link to={"/"} className="text-xl font-bold text-orange-500">
@@ -77,8 +73,9 @@ function Login() {
           </p>
 
           <form onSubmit={handleSubmit}>
+            {/* Email */}
             <div className="mb-4">
-              <label htmlFor="email" className=" text-gray-400 mb-2">
+              <label htmlFor="email" className="text-gray-400 mb-2">
                 Email
               </label>
               <input
@@ -91,13 +88,15 @@ function Login() {
                 required
               />
             </div>
+
+            {/* Password */}
             <div className="mb-4">
-              <label htmlFor="password" className=" text-gray-400 mb-2">
+              <label htmlFor="password" className="text-gray-400 mb-2">
                 Password
               </label>
               <div className="relative">
                 <input
-                  type="password"
+                  type={showPassword ? "text" : "password"}
                   id="password"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
@@ -105,22 +104,38 @@ function Login() {
                   placeholder="********"
                   required
                 />
-                <span className="absolute right-3 top-3 text-gray-500 cursor-pointer">
-                  👁️
+                <span
+                  className="absolute right-3 top-3 text-gray-400 cursor-pointer select-none"
+                  onClick={() => setShowPassword(!showPassword)}
+                  title={showPassword ? "Hide Password" : "Show Password"}
+                >
+                  {showPassword ? "🙈" : "👁️"}
                 </span>
               </div>
             </div>
+
+            {/* Error Message */}
             {errorMessage && (
               <div className="mb-4 text-red-500 text-center">
                 {errorMessage}
               </div>
             )}
+
+            {/* Login Button */}
             <button
               type="submit"
               className="w-full bg-orange-500 hover:bg-blue-600 text-white py-3 px-6 rounded-md transition"
             >
               Login
             </button>
+
+            {/* Don't have an account? Signup */}
+            <p className="mt-4 text-center text-sm text-gray-400">
+              Don't have an account?{" "}
+              <Link to="/signup" className="text-orange-500 hover:underline">
+                Sign up
+              </Link>
+            </p>
           </form>
         </div>
       </div>

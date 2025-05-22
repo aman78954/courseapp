@@ -1,14 +1,11 @@
-
 import React, { useState, useEffect } from "react";
-import axios from "axios"; // Import axios for API call
-import { FaCircleUser } from "react-icons/fa6";
+import axios from "axios";
+import { FaCircleUser, FaDiscourse, FaDownload } from "react-icons/fa6";
 import { RiHome2Fill } from "react-icons/ri";
-import { FaDiscourse } from "react-icons/fa";
-import { FaDownload } from "react-icons/fa6";
 import { IoMdSettings } from "react-icons/io";
 import { IoLogIn, IoLogOut } from "react-icons/io5";
 import { FiSearch } from "react-icons/fi";
-import { HiMenu, HiX } from "react-icons/hi"; // Import menu and close icons
+import { HiMenu, HiX } from "react-icons/hi";
 import logo1 from "../../public/logo1.jpg";
 import toast from "react-hot-toast";
 import { Link, useNavigate } from "react-router-dom";
@@ -18,38 +15,29 @@ function Courses() {
   const [courses, setCourses] = useState([]);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [loading, setLoading] = useState(true);
-  const [isSidebarOpen, setIsSidebarOpen] = useState(false); // State to toggle sidebar
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
+  const navigate = useNavigate();
 
-  console.log("courses: ", courses);
-
-  // Check token
   useEffect(() => {
     const token = localStorage.getItem("user");
-    if (token) {
-      setIsLoggedIn(true);
-    } else {
-      setIsLoggedIn(false);
-    }
+    setIsLoggedIn(!!token);
   }, []);
 
-  // Fetch courses
   useEffect(() => {
     const fetchCourses = async () => {
       try {
-        const response = await axios.get(`${BACKEND_URL}/course/courses`, {
-          withCredentials: true,
-        });
-        console.log(response.data.courses);
+        const response = await axios.get(`${BACKEND_URL}/course/courses`);
         setCourses(response.data.courses);
         setLoading(false);
       } catch (error) {
-        console.log("error in fetchCourses ", error);
+        console.log("Error fetching courses:", error);
+        setLoading(false);
       }
     };
     fetchCourses();
   }, []);
 
-  // Logout
   const handleLogout = async () => {
     try {
       const response = await axios.get(`${BACKEND_URL}/user/logout`, {
@@ -58,70 +46,93 @@ function Courses() {
       toast.success(response.data.message);
       localStorage.removeItem("user");
       setIsLoggedIn(false);
+      navigate("/");
     } catch (error) {
-      console.log("Error in logging out ", error);
-      toast.error(error.response.data.errors || "Error in logging out");
+      toast.error("Logout failed");
     }
   };
 
-  // Toggle sidebar for mobile devices
   const toggleSidebar = () => {
     setIsSidebarOpen(!isSidebarOpen);
   };
 
+  const filteredCourses = courses.filter((course) =>
+    (course.title + course.description)
+      .toLowerCase()
+      .includes(searchQuery.toLowerCase())
+  );
+
   return (
-    <div className="flex">
-      {/* Hamburger menu button for mobile */}
+    <div className="flex bg-gray-50 min-h-screen">
+      {/* Mobile menu toggle */}
       <button
-        className="md:hidden fixed top-4 left-4 z-20 text-3xl text-gray-800"
+        className="md:hidden fixed top-4 left-4 z-50 text-3xl text-gray-800"
         onClick={toggleSidebar}
       >
-        {isSidebarOpen ? <HiX /> : <HiMenu />} {/* Toggle menu icon */}
+        {isSidebarOpen ? <HiX /> : <HiMenu />}
       </button>
 
       {/* Sidebar */}
       <aside
-        className={`fixed top-0 left-0 h-screen bg-gray-100 w-64 p-5 transform z-10 transition-transform duration-300 ease-in-out ${
+        className={`fixed top-0 left-0 h-screen bg-white shadow-lg w-64 z-40 transform transition-transform duration-300 ease-in-out ${
           isSidebarOpen ? "translate-x-0" : "-translate-x-full"
         } md:translate-x-0 md:static`}
       >
-        <div className="flex items-center mb-10 mt-10 md:mt-0">
-          <img src={logo1} alt="Profile" className="rounded-full h-12 w-12" />
+        <div className="p-6 flex items-center gap-4 border-b">
+          <img
+            onClick={() => navigate("/")}
+            src={logo1}
+            alt="Logo"
+            className="h-12 w-12 rounded-full"
+          />
+          <h2
+            onClick={() => navigate("/")}
+            className="text-lg font-semibold text-gray-800 cursor-pointer"
+          >
+            CourseOcean
+          </h2>
         </div>
-        <nav>
-          <ul>
-            <li className="mb-4">
-              <a href="/" className="flex items-center">
-                <RiHome2Fill className="mr-2" /> Home
-              </a>
-            </li>
-            <li className="mb-4">
-              <a href="#" className="flex items-center text-blue-500">
-                <FaDiscourse className="mr-2" /> Courses
-              </a>
-            </li>
-            <li className="mb-4">
-              <a href="/purchases" className="flex items-center">
-                <FaDownload className="mr-2" /> Purchases
-              </a>
-            </li>
-            <li className="mb-4">
-              <a href="#" className="flex items-center">
-                <IoMdSettings className="mr-2" /> Settings
+        <nav className="px-6 py-4">
+          <ul className="space-y-4 text-gray-700">
+            <li>
+              <a
+                href="/"
+                className="flex items-center gap-3 hover:text-blue-600 transition"
+              >
+                <RiHome2Fill className="text-xl" /> Home
               </a>
             </li>
             <li>
+              <a
+                href="#"
+                className="flex items-center gap-3 text-blue-600 font-medium"
+              >
+                <FaDiscourse className="text-xl" /> Courses
+              </a>
+            </li>
+            <li>
+              <a
+                href="/purchases"
+                className="flex items-center gap-3 hover:text-blue-600 transition"
+              >
+                <FaDownload className="text-xl" /> Purchases
+              </a>
+            </li>
+
+            <li>
               {isLoggedIn ? (
-                <Link to={"/"}
-                  
-                  className="flex items-center"
+                <button
                   onClick={handleLogout}
+                  className="flex items-center gap-3 hover:text-red-600 transition"
                 >
-                  <IoLogOut className="mr-2" /> Logout
-                </Link>
+                  <IoLogOut className="text-xl" /> Logout
+                </button>
               ) : (
-                <Link to={"/login"} className="flex items-center">
-                  <IoLogIn className="mr-2" /> Login
+                <Link
+                  to="/login"
+                  className="flex items-center gap-3 hover:text-green-600 transition"
+                >
+                  <IoLogIn className="text-xl" /> Login
                 </Link>
               )}
             </li>
@@ -129,65 +140,65 @@ function Courses() {
         </nav>
       </aside>
 
-      {/* Main content */}
-      <main className="ml-0 md:ml-64 w-full bg-white p-10">
-        <header className="flex justify-between items-center mb-10">
-          <h1 className="text-xl font-bold">Courses</h1>
+      {/* Main Content */}
+      <main className="flex-1 p-6 md:p-10">
+        <header className="flex flex-col md:flex-row justify-between items-center mb-8 gap-4">
+          <h1 className="text-2xl font-bold text-gray-800">Available Courses</h1>
           <div className="flex items-center space-x-3">
-            <div className="flex items-center">
+            <div className="flex items-center border border-gray-300 rounded-full overflow-hidden">
               <input
                 type="text"
-                placeholder="Type here to search..."
-                className="border border-gray-300 rounded-l-full px-4 py-2 h-10 focus:outline-none"
+                placeholder="Search courses..."
+                className="px-4 py-2 outline-none"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
               />
-              <button className="h-10 border border-gray-300 rounded-r-full px-4 flex items-center justify-center">
+              <button className="px-4">
                 <FiSearch className="text-xl text-gray-600" />
               </button>
             </div>
-
-            <FaCircleUser className="text-4xl text-blue-600" />
           </div>
         </header>
 
-        {/* Vertically Scrollable Courses Section */}
         <div className="overflow-y-auto h-[75vh]">
           {loading ? (
-            <p className="text-center text-gray-500">Loading...</p>
-          ) : courses.length === 0 ? (
-            // Check if courses array is empty
+            <p className="text-center text-gray-500">Loading courses...</p>
+          ) : filteredCourses.length === 0 ? (
             <p className="text-center text-gray-500">
-              No course posted yet by admin
+              No courses found for "{searchQuery}"
             </p>
           ) : (
-            <div className="grid sm:grid-cols-2 md:grid-cols-3 gap-6">
-              {courses.map((course) => (
+            <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
+              {filteredCourses.map((course) => (
                 <div
                   key={course._id}
-                  className="border border-gray-200 rounded-lg p-4 shadow-sm"
+                  className="border border-gray-200 bg-white rounded-xl p-4 shadow-sm hover:shadow-lg transition"
                 >
                   <img
                     src={course.image.url}
                     alt={course.title}
-                    className="rounded mb-4"
+                    className="rounded-lg mb-4 w-full h-40 object-cover"
                   />
-                  <h2 className="font-bold text-lg mb-2">{course.title}</h2>
-                  <p className="text-gray-600 mb-4">
+                  <h2 className="font-semibold text-lg text-gray-800 mb-2">
+                    {course.title}
+                  </h2>
+                  <p className="text-sm text-gray-600 mb-3">
                     {course.description.length > 100
                       ? `${course.description.slice(0, 100)}...`
                       : course.description}
                   </p>
                   <div className="flex justify-between items-center mb-4">
-                    <span className="font-bold text-xl">
+                    <span className="text-xl font-bold text-orange-500">
                       ₹{course.price}{" "}
-                      <span className="text-gray-500 line-through">5999</span>
+                      <span className="text-sm text-gray-400 line-through">
+                        ₹5999
+                      </span>
                     </span>
-                    <span className="text-green-600">20% off</span>
+                    <span className="text-green-600 text-sm">20% off</span>
                   </div>
-
-                  {/* Buy page */}
                   <Link
-                    to={`/buy/${course._id}`} // Pass courseId in URL
-                    className="bg-orange-500 w-full text-white px-4 py-2 rounded-lg hover:bg-blue-900 duration-300"
+                    to={`/buy/${course._id}`}
+                    className="block text-center bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-800 transition"
                   >
                     Buy Now
                   </Link>

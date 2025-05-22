@@ -7,8 +7,8 @@ import { BACKEND_URL } from "../utils/utils";
 function AdminLogin() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-
   const [errorMessage, setErrorMessage] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
 
   const navigate = useNavigate();
 
@@ -97,7 +97,7 @@ function AdminLogin() {
               </label>
               <div className="relative">
                 <input
-                  type="password"
+                  type={showPassword?"text":"password"}
                   id="password"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
@@ -105,8 +105,12 @@ function AdminLogin() {
                   placeholder="********"
                   required
                 />
-                <span className="absolute right-3 top-3 text-gray-500 cursor-pointer">
-                  👁️
+                <span
+                  className="absolute right-3 top-3 text-gray-400 cursor-pointer select-none"
+                  onClick={() => setShowPassword(!showPassword)}
+                  title={showPassword ? "Hide Password" : "Show Password"}
+                >
+                  {showPassword ? "🙈" : "👁️"}
                 </span>
               </div>
             </div>
@@ -121,6 +125,11 @@ function AdminLogin() {
             >
               Login
             </button>
+            <p>Don't have an Account ?  <span 
+            onClick={() => navigate("/admin/signup")}
+            className="text-orange-400 hover:underline cursor-pointer">Create Acoount
+            </span></p>
+            
           </form>
         </div>
       </div>
